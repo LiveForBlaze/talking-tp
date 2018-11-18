@@ -1,20 +1,30 @@
-export const toggleModal = (name) => {
+export const toggleModal = (data) => {
   return {
     type: "TOGGLE_MODAL",
-    payload: name
+    payload: data
   }
 };
 
-export const signOut = (name) => {
+export const signOut = (data) => {
   return {
     type: "SIGN_OUT"
   }
 };
 
-export const changeName = (name) => {
-  console.log(name)
+export const changeName = (data) => {
   return {
     type: "CHANGE_NAME",
-    payload: name
+    payload: data
+  }
+};
+
+export const signupUser = (data) => {
+  return {
+    type: "SIGN_UP",
+    payload: {
+      userName: data.name,
+      email: data.email,
+      token: data.access_token,
+    }
   }
 };

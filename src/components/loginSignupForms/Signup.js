@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Button, Form, Label } from 'semantic-ui-react';
+import { bindActionCreators } from 'redux';
 
-const API_URL = "https://penxy-mock-api.herokuapp.com/signup";
-
+import { mapStateToProps } from '../../helpers/mapStateToProps';
+import { signupUser, toggleModal } from '../../actions/index';
+import { API_URL } from '../../constants';
 
 class Signup extends Component {
   state = {
     name: '',
     email: '',
     password: '',
-    formValid: true,
+    formValid: false,
     emailValid: true,
     passwordValid: true,
   }
@@ -29,24 +31,23 @@ class Signup extends Component {
   handleSignup = () => {
     const { name, email, password, formValid } = this.state;
     this.formValidation(email, password);
+    console.log(formValid);
     if (formValid) {
       let fetchData = {
-          method: 'POST',
-          body: JSON.stringify({
-            name,
-            email,
-            password
-          }),
-          headers: {
-            'Authorization': 'Bearer random_string',
-            'Accept': 'application/json',
-          }
+        method: 'POST',
+        body: new URLSearchParams(`name=${name}&email=${email}&password=${password}`),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+        }
       }
-    fetch('https://api.stackexchange.com/2.2/search?pagesize=10&order=desc&sort=votes&intitle=js&site=stackoverflow').then(res => console.log(res));
-    //working
-    fetch(API_URL, fetchData).then((res) => console.log(res));
-    //not working
-  }
+      fetch(`${API_URL}/signup`, fetchData)
+        .then((resp) => resp.json())
+        .then(user => {
+          const { signupUser, toggleModal } = this.props;
+          signupUser(user);
+          toggleModal();
+        });
+    }
   }
   handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,7 +55,6 @@ class Signup extends Component {
       [name]: value
     });
     let removeError = `${name}Valid`;
-    console.log(removeError);
     document.getElementById(name).classList.remove('error');
     this.setState({[removeError]: true}, () => console.log(this.state));
   }
@@ -89,4 +89,11 @@ class Signup extends Component {
   }
 }
 
-export default connect()(Signup);
+function  mapDispatchToProps(dispatch) {
+  return bindActionCreators({
+    signupUser: signupUser,
+    toggleModal: toggleModal
+  }, dispatch)
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Signup);

@@ -1,8 +1,10 @@
 const initialState = {
   showModal: false,
   modalName: '',
-  logged: true,
-  name: 'Test Name'
+  logged: false,
+  userName: '',
+  email: 'Test Email',
+  token: ''
 }
 export default function appState(state=initialState, action) {
   switch (action.type) {
@@ -16,9 +18,18 @@ export default function appState(state=initialState, action) {
             logged: false
           })
     case 'CHANGE_NAME':
+    console.log(action.payload)
       return Object.assign({}, state, {
-            name: action.payload
+            userName: action.payload,
+            logged: true
           })
+    case 'SIGN_UP':
+      return Object.assign({}, state, {
+          userName: action.payload.userName,
+          email: action.payload.email,
+          logged: true,
+          token: action.payload.token
+      })
     default:
       return state;
   }

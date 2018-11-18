@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { withRouter } from 'react-router';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+
 import Navbar from './Navbar';
 import Home from './Home';
 import Profile from './Profile';
-import './App.css';
 
+import './App.css';
 import { toggleModal } from '../actions/index';
 
 class App extends Component {
@@ -15,7 +16,7 @@ class App extends Component {
     const content = this;
     window.onclick = function(event) {
       if (event.target === document.getElementById('modal')) {
-          content.props.toggleModal();
+        content.props.toggleModal();
       }
     }
   }
@@ -23,10 +24,8 @@ class App extends Component {
     return (
       <div className="container">
         <Navbar />
-        <Switch>
-          <Route exact path="/" component={Home} />
-          <Route exact path="/profile" component={Profile} />
-        </Switch>
+        <Route exact path="/" component={Home} />
+        <Route exact path="/profile" component={Profile} />
       </div>
     )
   }

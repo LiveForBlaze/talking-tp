@@ -4,23 +4,62 @@ import { Form, Button } from 'semantic-ui-react';
 import { Redirect } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { mapStateToProps } from '../helpers/mapStateToProps';
-import { changeName } from '../actions/index';
+import { changeName, signupUser, toggleModal } from '../actions/index';
+import { API_URL } from '../constants';
 
 class Profile extends Component {
   state = {
-    name: ''
+    userName: '',
+    password: '',
+    passwordCheck: '',
   }
   handleChange = (e) => {
-    console.log(e.target.value)
+    const { name, value } = e.target;
     this.setState({
-      name: e.target.value
-    });
+      [name]: value
+    }, () => console.log(this.state));
   }
-  handleChangeName = () => {
-    this.props.changeName(this.state.name);
+  changeData = (data) => {
+    const { userName, password } = data;
+    const { passwordCheck } = this.state;
+    const { changeName, toggleModal, app } = this.props;
+    const newData = userName ? `name=${userName}` : `password=${password}`;
+    if (password && password !== passwordCheck ){
+      return alert('Пароли не совпадают');
+    }
+    let fetchData = {
+      method: 'PUT',
+      body: new URLSearchParams(newData),
+      headers: {
+        'Authorization': `Bearer ${app.token}`,
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+      }
+    }
+    fetch(`${API_URL}/profile`, fetchData)
+      .then((resp) => resp.json())
+      .then(user => {
+        if (userName) {
+          changeName(userName);
+          toggleModal();
+        }
+      })
+      .then(() => {
+        let input,check;
+        if (!!userName) {
+          input = 'userName';
+        } else {
+          input = 'password';
+          check = 'passwordCheck'
+        }
+        console.log(input);
+        this.setState({[input]: '', [check]: ''})
+      }
+      );
   }
+
   render() {
-    const { app } = this.props
+    const { app } = this.props;
+    const { userName, password, passwordCheck } = this.state;
     return (
       <div>
       {!app.logged && <Redirect to="/" />}
@@ -28,10 +67,10 @@ class Profile extends Component {
         <h3>Change Name </h3>
         <Form>
           <Form.Field>
-            <input placeholder='Full name' className="input" name="name" onChange={this.handleChange}/>
+            <input placeholder='Full name' className="input" name="userName" value={userName} onChange={this.handleChange}/>
           </Form.Field>
           <Form.Field inline>
-            <Button onClick={this.handleChangeName} className="signup">
+            <Button onClick={this.changeData.bind(this, { userName })} className="signup">
               Change Name
             </Button>
           </Form.Field>
@@ -41,13 +80,13 @@ class Profile extends Component {
         <h3>Change Password</h3>
         <Form>
           <Form.Field>
-            <input type="password" placeholder='Password' name="password" onChange={this.handleChange}/>
+            <input type="password" placeholder='Password' name="password" value={password} onChange={this.handleChange}/>
           </Form.Field>
           <Form.Field>
-            <input type="password" placeholder='Repeat Password' name="passwordCheck" onChange={this.handleChange}/>
+            <input type="password" placeholder='Repeat Password' name="passwordCheck" value={passwordCheck} onChange={this.handleChange}/>
           </Form.Field>
           <Form.Field inline>
-            <Button className="signup" onClick={this.handleGet}>
+            <Button className="signup" onClick={this.changeData.bind(this, { password })}>
               Change
             </Button>
           </Form.Field>
@@ -61,6 +100,8 @@ class Profile extends Component {
 function  mapDispatchToProps(dispatch) {
   return bindActionCreators({
     changeName: changeName,
+    toggleModal: toggleModal,
+    signupUser: signupUser
   }, dispatch)
 }
 

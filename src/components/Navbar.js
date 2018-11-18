@@ -1,36 +1,32 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { Redirect  } from 'react-router-dom';
+import { Link  } from 'react-router-dom';
 import { Button } from 'semantic-ui-react';
 import { toggleModal, signOut } from '../actions/index';
 import { mapStateToProps } from '../helpers/mapStateToProps';
+import { withRouter } from 'react-router';
 
 class Navbar extends Component {
-  state = {
-    re: false,
-  }
   toggleModal = (e) => {
     const { app, toggleModal, signOut } = this.props;
     (!app.logged) ? toggleModal(e.target.name) :
-      (e.target.name === "signup") ? signOut() : this.setState({re:true});
+      (e.target.name === "signup") ? signOut() : this.props.history.push('/profile');
   }
   checkNameLength = (name) => {
-    if (name.length > 20) {
+    if (name && name.length > 20) {
       return `${name.substring(0,20)} ...`;
     }
     return name;
   }
   render() {
-    const { app } = this.props;
-    const { re } = this.state;
+    const { userName, logged } = this.props.app;
     return (
       <div className="navbar">
-        <div><h3>Logo</h3></div>
-        {re && <Redirect to="/profile" />}
+        <div><h3><Link to="/">Logo</Link></h3></div>
         <div>
-          <Button className="login" onClick={this.toggleModal} name="login">{!app.logged ? 'Log In' : this.checkNameLength(app.name)}</Button>
-          <Button className="signup" onClick={this.toggleModal} name="signup">{!app.logged ? 'Sign Up' : 'Log Out'}</Button>
+          <Button className="login" onClick={this.toggleModal} name="login">{!logged ? 'Log In' : this.checkNameLength(userName)}</Button>
+          <Button className="signup" onClick={this.toggleModal} name="signup">{!logged ? 'Sign Up' : 'Log Out'}</Button>
         </div>
       </div>
     )
@@ -45,4 +41,4 @@ function  mapDispatchToProps(dispatch) {
 }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(Navbar);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Navbar));
